@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-
+#include <sys/wait.h>
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        fprintf(stderr, "Usage: forkloop <iterations>\n");
+        fprintf(stderr, "Usage: childcreates <iterations>\n");
         exit(1);
     }
 
     int iterations = strtol(argv[1], NULL, 10);
+
+    int did_fork = 0;
 
     for (int i = 0; i < iterations; i++) {
         int n = fork();
@@ -18,6 +20,14 @@ int main(int argc, char **argv) {
             exit(1);
         }
         printf("ppid = %d, pid = %d, i = %d\n", getppid(), getpid(), i);
+        if (n > 0) {
+            did_fork = 1;
+            break;
+        }
+    }
+
+    if (did_fork) {
+        wait(NULL);
     }
 
     return 0;
